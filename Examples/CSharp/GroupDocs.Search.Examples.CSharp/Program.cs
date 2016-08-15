@@ -68,6 +68,9 @@ namespace GroupDocs.Search_for_.NET
 
             //Indexing.CustomExtractor();
 
+            //Indexing.PreventUnnecessaryFileIndex();
+
+            //Indexing.TrackFileChanges();
 
             #endregion
 

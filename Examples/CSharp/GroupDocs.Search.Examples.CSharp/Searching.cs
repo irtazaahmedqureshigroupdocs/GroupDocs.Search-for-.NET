@@ -28,7 +28,7 @@ namespace GroupDocs.Search_for_.NET
             // List of found files
             foreach (DocumentResultInfo documentResultInfo in searchResults)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:SimpleSearch
         }
@@ -53,7 +53,7 @@ namespace GroupDocs.Search_for_.NET
             // List of found files
             foreach (DocumentResultInfo documentResultInfo in searchResults)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:BooleanSearch
         }
@@ -82,14 +82,14 @@ namespace GroupDocs.Search_for_.NET
             Console.WriteLine("Follwoing document(s) contain provided relevant tag: \n");
             foreach (DocumentResultInfo documentResultInfo in searchResults1)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
 
             // List of found files
             Console.WriteLine("Follwoing document(s) contain provided RegEx: \n");
             foreach (DocumentResultInfo documentResultInfo in searchResults2)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:Regexsearch
         }
@@ -139,7 +139,7 @@ namespace GroupDocs.Search_for_.NET
             // List of found files
             foreach (DocumentResultInfo documentResultInfo in searchResults)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:Facetedsearch
         }
@@ -164,7 +164,7 @@ namespace GroupDocs.Search_for_.NET
             // List of found files
             foreach (DocumentResultInfo documentResultInfo in searchResults)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:SearchFileName
         }
@@ -188,7 +188,7 @@ namespace GroupDocs.Search_for_.NET
             // List of found files
             foreach (DocumentResultInfo documentResultInfo in searchResults)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:FacetedSearchWithBooleanSearch
         }
@@ -218,9 +218,62 @@ namespace GroupDocs.Search_for_.NET
             // List of found files
             foreach (DocumentResultInfo documentResultInfo in searchResults)
             {
-                Console.Write(documentResultInfo.FileName + "\n");
+                Console.WriteLine("Query \"{0}\" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName);
             }
             //ExEnd:SynonymSearch
+        }
+
+        /// <summary>
+        /// Shows how to implement own custom extractor for outlook document for the extension .ost and .pst files
+        /// </summary>
+        /// <param name="searchString">string to search</param>
+        public static void OwnExtractorOst(string searchString)
+        {
+            //ExStart:OwnExtractorOst
+            // Create or load index
+            Index index = new Index(Utilities.indexPath);
+            
+            index.CustomExtractors.Add(new CustomOstPstExtractor()); // Adding new custom extractor for container document
+
+            index.AddToIndex(Utilities.documentsPath); // Documents with "ost" and "pst" extension will be indexed using MyCustomContainerExtractor
+
+            SearchResults searchResults = index.Search(searchString);
+            //ExEnd:OwnExtractorOst
+        }
+
+        /// <summary>
+        /// Shows how to implement own custom extractor for outlook document for the extension .ost and .pst files
+        /// </summary>
+        /// <param name="searchString">string to search</param>
+        public static void DetailedResults(string searchString)
+        {
+            //ExStart:DetailedResultsPropertyInDocuments
+            // Create or load index
+            Index index = new Index(Utilities.indexPath);
+            index.AddToIndex(Utilities.documentsPath);
+
+            SearchResults results = index.Search(searchString);
+
+            foreach (DocumentResultInfo resultInfo in results)
+            {
+                if (resultInfo.DocumentType == DocumentType.OutlookEmailMessage)
+                {
+                    // for email message result info user should cast resultInfo as OutlookEmailMessageResultInfo for acessing EntryIdString property
+                    OutlookEmailMessageResultInfo emailResultInfo = resultInfo as OutlookEmailMessageResultInfo;
+
+                    Console.WriteLine("Query \"{0}\" has {1} hit count in message {2} in file {3}", query, emailResultInfo.HitCount, emailResultInfo.EntryIdString, emailResultInfo.FileName);
+                }
+                else
+                {
+                    Console.WriteLine("Query \"{0}\" has {1} hit count in file {2}", query, resultInfo.HitCount, resultInfo.FileName);
+                }
+
+                foreach (DetailedResultInfo detailedResult in resultInfo.DetailedResults)
+                {
+                    Console.WriteLine("{0}In field \"{1}\" there was found {2} hit count", "\t", detailedResult.FieldName, detailedResult.HitCount);
+                }
+            }
+            //ExEnd:DetailedResultsPropertyInDocuments
         }
     }
 }

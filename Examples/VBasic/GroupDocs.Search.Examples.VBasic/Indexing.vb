@@ -1,5 +1,12 @@
-﻿Public Class Indexing
+﻿
+Imports System.Collections.Generic
+Imports System.Linq
+Imports System.Text
+Imports System.Threading.Tasks
+Imports GroupDocs.Search
+Imports GroupDocs.Search.Events
 
+Class Indexing
     ''' <summary>
     ''' Update index
     ''' </summary>
@@ -31,7 +38,7 @@
         'ExStart:UpdateIndexAsynchronously
         'Load index
         Dim index As New Index(Utilities.indexPath)
-        AddHandler index.OperationFinished, Utilities.index_OperationFinished
+        index.OperationFinished += Utilities.index_OperationFinished
         ' Update index asynchronously
         index.UpdateAsync()
         'ExEnd:UpdateIndexAsynchronously
@@ -43,7 +50,7 @@
     Public Shared Sub UpdateIndexInRepoAsynchronously()
         'ExStart:UpdateIndexInRepoAsynchronously
         Dim repository As New IndexRepository()
-        AddHandler repository.OperationFinished, Utilities.index_OperationFinished
+        repository.OperationFinished += Utilities.index_OperationFinished
 
         repository.AddToRepository(Utilities.indexPath)
         repository.AddToRepository(Utilities.indexPath2)
@@ -121,7 +128,7 @@
         ' Load indexes to index repository
         Dim repository As New IndexRepository()
         repository.AddToRepository(index)
-        'repository.AddToRepository(Utilities.indexPath2)
+        'repository.AddToRepository(Utilities.indexPath2);
         'ExEnd:loadindex
     End Sub
 
@@ -144,7 +151,7 @@
         'ExStart:AddDocumentToIndexAsynchronously
         ' Create index
         Dim index As New Index(Utilities.indexPath)
-        AddHandler index.OperationFinished, Utilities.index_OperationFinished
+        index.OperationFinished += Utilities.index_OperationFinished
         ' all files from folder and its subfolders will be added to the index
         index.AddToIndexAsync(Utilities.documentsPath)
         'ExEnd:AddDocumentToIndexAsynchronously
@@ -157,7 +164,7 @@
         'ExStart:SubscriptionToEvents
         ' Create index in memory
         Dim index As New Index()
-        AddHandler index.OperationFinished, Utilities.index_OperationFinished
+        index.OperationFinished += Utilities.index_OperationFinished
         index.AddToIndexAsync(Utilities.documentsPath)
         index.UpdateAsync()
         'ExEnd:SubscriptionToEvents
@@ -173,6 +180,64 @@
 
         index.AddToIndex(Utilities.documentsPath)
         'ExEnd:CustomExtractor
+    End Sub
+
+
+    ''' <summary>
+    ''' Add PowerPoint Document to index
+    ''' </summary>
+    Public Shared Sub AddPowerPointDocumentToIndex()
+        'ExStart:AddPowerPointDocumentToIndex
+        ' Create index
+        Dim index As New Index(Utilities.indexPath)
+        ' all files from folder and its subfolders will be added to the index
+        index.AddToIndex(Utilities.documentsPath)
+
+        Dim results1 As SearchResults = index.Search("author:cisco")
+        ' searching by author of presentation
+        Dim results2 As SearchResults = index.Search("LastSavedBy:teresa")
+        ' searching by person who saved presentation last time
+        'ExEnd:AddPowerPointDocumentToIndex
+    End Sub
+
+    ''' <summary>
+    ''' Prevents Unnecessary File Indexing
+    ''' </summary>
+    Public Shared Sub PreventUnnecessaryFileIndex()
+        'ExStart: PreventUnnecessaryFileIndex
+        ' Create index
+        Dim index As New Index(Utilities.indexPath)
+
+        ' Add documents to index
+        index.AddToIndex(Utilities.documentsPath)
+
+        ' Try add the same documents to index
+        index.AddToIndex(Utilities.documentsPath)
+        ' Already indexed files will not be reindexed.
+        'ExEnd: PreventUnnecessaryFileIndex
+    End Sub
+
+    ''' <summary>
+    '''  Track all changes to files in the folder: adding, deleting or updating files.
+    ''' </summary>
+    Public Shared Sub TrackFileChanges()
+        'ExStart: TrackFileChanges
+        ' Create index
+        Dim index As New Index(Utilities.indexPath)
+
+        ' Add documents to index
+        index.AddToIndex(Utilities.documentsPath)
+
+        ' Remove some documents from document path as shared in Utilities.documentsPath
+        ' Edit some documents in Utilities.documentsPath
+        ' Add some new documents to Utilities.documentsPath
+
+        index.Update()
+        ' removed documents will be marked as deleted in index and will not be added to search results
+        ' Edited documents will be reindexed
+        ' Added documents will be added to index
+
+        'ExEnd: TrackFileChanges
     End Sub
 
 End Class

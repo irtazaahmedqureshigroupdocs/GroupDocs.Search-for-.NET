@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomFieldExtractor.cs" />
+    <Compile Include="CustomOstPstExtractor.cs" />
     <Compile Include="Indexing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

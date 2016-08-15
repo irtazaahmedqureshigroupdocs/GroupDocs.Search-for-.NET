@@ -1,5 +1,4 @@
 ﻿Public Class Searching
-
     ''' <summary>
     ''' Creates index, adds documents to index and search string in index
     ''' </summary>
@@ -17,7 +16,7 @@
 
         ' List of found files
         For Each documentResultInfo As DocumentResultInfo In searchResults
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:SimpleSearch
     End Sub
@@ -40,7 +39,7 @@
 
         ' List of found files
         For Each documentResultInfo As DocumentResultInfo In searchResults
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:BooleanSearch
     End Sub
@@ -67,13 +66,13 @@
         ' List of found files 
         Console.WriteLine("Follwoing document(s) contain provided relevant tag: " & vbLf)
         For Each documentResultInfo As DocumentResultInfo In searchResults1
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
 
         ' List of found files
         Console.WriteLine("Follwoing document(s) contain provided RegEx: " & vbLf)
         For Each documentResultInfo As DocumentResultInfo In searchResults2
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:Regexsearch
     End Sub
@@ -114,12 +113,12 @@
         index.AddToIndex(Utilities.documentsPath)
 
         ' Searching for any document in index that contain word "return" in file content
-        Dim searchResults As SearchResults = index.Search(Convert.ToString("content:") & searchString)
+        Dim searchResults As SearchResults = index.Search(Convert.ToString("Content:") & searchString)
 
 
         ' List of found files
         For Each documentResultInfo As DocumentResultInfo In searchResults
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:Facetedsearch
     End Sub
@@ -137,12 +136,12 @@
         index.AddToIndex(Utilities.documentsPath)
 
         ' Searching for any document in index that contain search string in file name
-        Dim searchResults As SearchResults = index.Search(Convert.ToString("filename:") & searchString)
+        Dim searchResults As SearchResults = index.Search(Convert.ToString("FileName:") & searchString)
 
 
         ' List of found files
         For Each documentResultInfo As DocumentResultInfo In searchResults
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:SearchFileName
     End Sub
@@ -164,7 +163,7 @@
 
         ' List of found files
         For Each documentResultInfo As DocumentResultInfo In searchResults
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:FacetedSearchWithBooleanSearch
     End Sub
@@ -192,9 +191,54 @@
 
         ' List of found files
         For Each documentResultInfo As DocumentResultInfo In searchResults
-            Console.Write(documentResultInfo.FileName + vbLf)
+            Console.WriteLine("Query ""{0}"" has {1} hit count in file: {2}", query, resultInfo.HitCount, resultInfo.FileName)
         Next
         'ExEnd:SynonymSearch
     End Sub
 
+    ''' <summary>
+    ''' Shows how to implement own custom extractor for outlook document for the extension .ost and .pst files
+    ''' </summary>
+    ''' <param name="searchString">string to search</param>
+    Public Shared Sub OwnExtractorOst(searchString As String)
+        'ExStart:OwnExtractorOst
+        ' Create or load index
+        Dim index As New Index(Utilities.indexPath)
+
+        index.CustomExtractors.Add(New CustomOstPstExtractor())
+        ' Adding new custom extractor for container document
+        index.AddToIndex(Utilities.documentsPath)
+        ' Documents with "ost" and "pst" extension will be indexed using MyCustomContainerExtractor
+        Dim searchResults As SearchResults = index.Search(searchString)
+        'ExEnd:OwnExtractorOst
+    End Sub
+
+    ''' <summary>
+    ''' Shows how to implement own custom extractor for outlook document for the extension .ost and .pst files
+    ''' </summary>
+    ''' <param name="searchString">string to search</param>
+    Public Shared Sub DetailedResults(searchString As String)
+        'ExStart:DetailedResultsPropertyInDocuments
+        ' Create or load index
+        Dim index As New Index(Utilities.indexPath)
+        index.AddToIndex(Utilities.documentsPath)
+
+        Dim results As SearchResults = index.Search(searchString)
+
+        For Each resultInfo As DocumentResultInfo In results
+            If resultInfo.DocumentType = DocumentType.OutlookEmailMessage Then
+                ' for email message result info user should cast resultInfo as OutlookEmailMessageResultInfo for acessing EntryIdString property
+                Dim emailResultInfo As OutlookEmailMessageResultInfo = TryCast(resultInfo, OutlookEmailMessageResultInfo)
+
+                Console.WriteLine("Query ""{0}"" has {1} hit count in message {2} in file {3}", query, emailResultInfo.HitCount, emailResultInfo.EntryIdString, emailResultInfo.FileName)
+            Else
+                Console.WriteLine("Query ""{0}"" has {1} hit count in file {2}", query, resultInfo.HitCount, resultInfo.FileName)
+            End If
+
+            For Each detailedResult As DetailedResultInfo In resultInfo.DetailedResults
+                Console.WriteLine("{0}In field ""{1}"" there was found {2} hit count", vbTab, detailedResult.FieldName, detailedResult.HitCount)
+            Next
+        Next
+        'ExEnd:DetailedResultsPropertyInDocuments
+    End Sub
 End Class
