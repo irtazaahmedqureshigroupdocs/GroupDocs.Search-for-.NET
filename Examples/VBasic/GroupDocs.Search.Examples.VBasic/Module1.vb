@@ -62,7 +62,8 @@
 
         'Indexing.PreventUnnecessaryFileIndex()
 
-        '
+        'Indexing.SearchingEmailMessages()
+
 
         '#End Region
 

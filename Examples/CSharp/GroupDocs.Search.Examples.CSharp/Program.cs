@@ -70,6 +70,7 @@ namespace GroupDocs.Search_for_.NET
 
             //Indexing.PreventUnnecessaryFileIndex();
 
+            //Indexing.SearchingEmailMessages();
             #endregion
 
         }

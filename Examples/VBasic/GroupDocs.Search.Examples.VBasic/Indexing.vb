@@ -1,12 +1,5 @@
 ﻿
-Imports System.Collections.Generic
-Imports System.Linq
-Imports System.Text
-Imports System.Threading.Tasks
-Imports GroupDocs.Search
-Imports GroupDocs.Search.Events
-
-Class Indexing
+Public Class Indexing
     ''' <summary>
     ''' Update index
     ''' </summary>
@@ -217,4 +210,63 @@ Class Indexing
         'ExEnd: PreventUnnecessaryFileIndex
     End Sub
 
+    ''' <summary>
+    ''' Search and Browse Email using Aspose.Email API
+    ''' </summary>
+    Public Shared Sub SearchingEmailMessages()
+        'ExStart: SearchingEmailMessages
+        ' Create index
+        Dim index As New Index(Utilities.indexPath)
+
+        ' Indexing MS Outlook storage with email messages
+        index.OperationFinished += index_OperationFinished
+        index.ErrorHappened += index_ErrorHappened
+        index.AddToIndex(Utilities.documentsPath)
+
+        ' Searching in index
+        Dim results As SearchResults = index.Search(searchQuery)
+
+        ' User gets all messages that qualify to search query using Aspose.Email API
+        Dim messages As New MessageInfoCollection()
+        For Each searchResult As DocumentResultInfo In results
+            If searchResult.DocumentType = DocumentType.OutlookEmailMessage Then
+                Dim emailResultInfo As OutlookEmailMessageResultInfo = TryCast(searchResult, OutlookEmailMessageResultInfo)
+                Dim message As MessageInfo = GetEmailMessagesById(pstFileLink, emailResultInfo.EntryIdString)
+                If message IsNot Nothing Then
+                    messages.Add(message)
+                End If
+            End If
+        Next
+        'ExEnd: SearchingEmailMessages
+    End Sub
+
+#Region "Getting Email Messages by EntryIdString using Aspose.Email API"
+
+    Private Function GetEmailMessagesById(fileName As String, fieldId As String) As MessageInfo
+        Dim pst As PersonalStorage = PersonalStorage.FromFile(fileName, False)
+        Return GetEmailMessagesById(pst.RootFolder, fieldId)
+    End Function
+
+    Private Function GetEmailMessagesById(folderInfo As FolderInfo, fieldId As String) As MessageInfo
+        Dim result As MessageInfo = Nothing
+        Dim messageInfoCollection As MessageInfoCollection = folderInfo.GetContents()
+        For Each messageInfo As MessageInfo In messageInfoCollection
+            If messageInfo.EntryIdString = fieldId Then
+                result = messageInfo
+                Exit For
+            End If
+        Next
+
+        If result Is Nothing AndAlso folderInfo.HasSubFolders Then
+            For Each subfolderInfo As FolderInfo In folderInfo.GetSubFolders()
+                result = GetEmailMessagesById(subfolderInfo, fieldId)
+                If result IsNot Nothing Then
+                    Exit For
+                End If
+            Next
+        End If
+        Return result
+    End Function
+
+#End Region
 End Class
