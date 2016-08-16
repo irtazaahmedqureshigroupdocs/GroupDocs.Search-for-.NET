@@ -233,29 +233,5 @@ namespace GroupDocs.Search_for_.NET
             //ExEnd: PreventUnnecessaryFileIndex
         }
 
-        /// <summary>
-        ///  Track all changes to files in the folder: adding, deleting or updating files.
-        /// </summary>
-        public static void TrackFileChanges()
-        {
-            //ExStart: TrackFileChanges
-            // Create index
-            Index index = new Index(Utilities.indexPath);
-
-            // Add documents to index
-            index.AddToIndex(Utilities.documentsPath);
-
-            // Remove some documents from document path as shared in Utilities.documentsPath
-            // Edit some documents in Utilities.documentsPath
-            // Add some new documents to Utilities.documentsPath
-
-            index.Update();
-            // removed documents will be marked as deleted in index and will not be added to search results
-            // Edited documents will be reindexed
-            // Added documents will be added to index
-
-            //ExEnd: TrackFileChanges
-        }
-
     }
 }

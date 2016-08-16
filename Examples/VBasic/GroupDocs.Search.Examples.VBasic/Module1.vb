@@ -60,6 +60,9 @@
 
         'Indexing.CustomExtractor()
 
+        'Indexing.PreventUnnecessaryFileIndex()
+
+        '
 
         '#End Region
 
