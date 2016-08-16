@@ -233,5 +233,75 @@ namespace GroupDocs.Search_for_.NET
             //ExEnd: PreventUnnecessaryFileIndex
         }
 
+        /// <summary>
+        /// Search and Browse Email using Aspose.Email API
+        /// </summary>
+        public static void SearchingEmailMessages()
+        {
+            //ExStart: SearchingEmailMessages
+            // Create index
+            Index index = new Index(Utilities.indexPath);
+
+            // Indexing MS Outlook storage with email messages
+            index.OperationFinished += index_OperationFinished;
+            index.ErrorHappened += index_ErrorHappened;
+            index.AddToIndex(Utilities.documentsPath);
+
+            // Searching in index
+            SearchResults results = index.Search(searchQuery);
+
+            // User gets all messages that qualify to search query using Aspose.Email API
+            MessageInfoCollection messages = new MessageInfoCollection();
+            foreach (DocumentResultInfo searchResult in results)
+            {
+                if (searchResult.DocumentType == DocumentType.OutlookEmailMessage)
+                {
+                    OutlookEmailMessageResultInfo emailResultInfo = searchResult as OutlookEmailMessageResultInfo;
+                    MessageInfo message = GetEmailMessagesById(pstFileLink, emailResultInfo.EntryIdString);
+                    if (message != null)
+                    {
+                        messages.Add(message);
+                    }
+                }
+            }
+            //ExEnd: SearchingEmailMessages
+        }
+
+        #region Getting Email Messages by EntryIdString using Aspose.Email API
+
+        private MessageInfo GetEmailMessagesById(string fileName, string fieldId)
+        {
+            PersonalStorage pst = PersonalStorage.FromFile(fileName, false);
+            return GetEmailMessagesById(pst.RootFolder, fieldId);
+        }
+
+        private MessageInfo GetEmailMessagesById(FolderInfo folderInfo, string fieldId)
+        {
+            MessageInfo result = null;
+            MessageInfoCollection messageInfoCollection = folderInfo.GetContents();
+            foreach (MessageInfo messageInfo in messageInfoCollection)
+            {
+                if (messageInfo.EntryIdString == fieldId)
+                {
+                    result = messageInfo;
+                    break;
+                }
+            }
+
+            if (result == null && folderInfo.HasSubFolders)
+            {
+                foreach (FolderInfo subfolderInfo in folderInfo.GetSubFolders())
+                {
+                    result = GetEmailMessagesById(subfolderInfo, fieldId);
+                    if (result != null)
+                    {
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        #endregion
     }
 }
